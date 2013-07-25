@@ -3,19 +3,19 @@ class AppDelegate
 
     puts
 
-    a = A.new
-    b = B.new
-    c = C.new
-    d = D.new
-    e = E.new
+    a = A.new; time("Native method (raw)") { a.m }
+    b = B.new; time("define_method (raw)") { b.m }
+    c = C.new; time("method_missing (raw)") { c.m }
+    d = D.new; time("module included in class (raw)") { d.m }
+    e = E.new; time("class_addMethod (raw)") { e.m }
 
-    time("Native method") { a.m }
-    time("define_method") { b.m }
-    time("method_missing") { c.m }
-    time("included module") { d.m }
-    time("class_addMethod") { e.m }
+    time("Native method (with object creation)") { A.new.m }
+    time("define_method (with object creation)") { B.new.m }
+    time("method_missing (with object creation)") { C.new.m }
+    time("module included in class (with object creation)") { D.new.m }
+    time("class_addMethod (with object creation)") { E.new.m }
+    time("extend with module on the fly") { f = Object.new; f.extend(Dprime); f.m }
      
-    puts
     puts
     puts
 
@@ -24,12 +24,12 @@ class AppDelegate
 
 
   def time(message)
-    times = 10.times.map {
+    times = 100.times.map {
       t = Time.now
       10000.times { yield }
       Time.now - t
     }
-    puts "%30s: %15f" % [message, times.reduce(:+) / 10]
+    puts "%50s: %15f" % [message, times.reduce(:+) / 100]
   end
 
 end
