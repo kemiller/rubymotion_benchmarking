@@ -24,7 +24,7 @@ class AppDelegate
 
 
   def time(message)
-    times = 100.times.map {
+    times = 10.times.map {
       t = Time.now
       10000.times { yield }
       Time.now - t
