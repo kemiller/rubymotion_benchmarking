@@ -3,19 +3,25 @@ class AppDelegate
 
     puts
 
-    a = A.new; time("Native method (raw)") { a.m }
-    b = B.new; time("define_method (raw)") { b.m }
-    c = C.new; time("method_missing (raw)") { c.m }
-    d = D.new; time("module included in class (raw)") { d.m }
-    e = E.new; time("class_addMethod (raw)") { e.m }
+    #puts "%60s: %15f" % ["ObjC native loop", BenchmarkBase.new.]
+    r = BenchmarkBase.new;
+    time("ObjC native loop", nil, ->(o) { r.benchmark(10000) })
+    time("ObjC native loop w/objc_msgSend", nil, ->(o) { r.benchmark_send(10000) })
+    time("ObjC method called from ruby (raw)", r)
+    a = A.new; time("def method (raw)", a)
+    b = B.new; time("define_method (raw)", b)
+    c = C.new; time("method_missing (raw)", c)
+    d = D.new; time("module included in class (raw)", d)
+    e = E.new; time("class_addMethod (raw)", e)
 
-    time("Native method (with object creation)") { A.new.m }
-    time("define_method (with object creation)") { B.new.m }
-    time("method_missing (with object creation)") { C.new.m }
-    time("module included in class (with object creation)") { D.new.m }
-    time("class_addMethod (with object creation)") { E.new.m }
-    time("extend with module on the fly") { f = Object.new; f.extend(Dprime); f.m }
-     
+    # time("ObjC method called from ruby (with object creation)") { BenchmarkBase.new.i }
+    # time("def method (with object creation)") { A.new.m }
+    # time("define_method (with object creation)") { B.new.m }
+    # time("method_missing (with object creation)") { C.new.m }
+    # time("module included in class (with object creation)") { D.new.m }
+    # time("class_addMethod (with object creation)") { E.new.m }
+    # time("extend with module on the fly") { f = Object.new; f.extend(Dprime); f.m }
+
     puts
     puts
 
@@ -23,13 +29,13 @@ class AppDelegate
   end
 
 
-  def time(message)
+  def time(message, object = nil, func = ->(o) { for i in (1..1000).to_a; o.m; end })
     times = 10.times.map {
       t = Time.now
-      10000.times { yield }
+      func.call(object)
       Time.now - t
     }
-    puts "%50s: %15f" % [message, times.reduce(:+) / 100]
+    puts "%60s: %15f" % [message, times.reduce(:+) / 100]
   end
 
 end
@@ -49,15 +55,15 @@ class A
 end
 
 class B
-  define_method(:m) do 
+  define_method(:m) do
     1
   end
 
-  define_method(:n) do 
+  define_method(:n) do
     2
   end
 
-  define_method(:o) do 
+  define_method(:o) do
     2
   end
 end
