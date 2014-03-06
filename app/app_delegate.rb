@@ -13,6 +13,7 @@ class AppDelegate
     c = C.new; time("method_missing (raw)", c)
     d = D.new; time("module included in class (raw)", d)
     e = E.new; time("class_addMethod (raw)", e)
+    time("ruby method called from ObjC (raw)", nil, ->(o) { r.benchmark_ruby(10000, with_object: a, and_selector: :m) })
 
     # time("ObjC method called from ruby (with object creation)") { BenchmarkBase.new.i }
     # time("def method (with object creation)") { A.new.m }
@@ -29,13 +30,13 @@ class AppDelegate
   end
 
 
-  def time(message, object = nil, func = ->(o) { for i in (1..1000).to_a; o.m; end })
+  def time(message, object = nil, func = ->(o) { for i in (1..10000).to_a; o.m; end })
     times = 10.times.map {
       t = Time.now
       func.call(object)
       Time.now - t
     }
-    puts "%60s: %15f" % [message, times.reduce(:+) / 100]
+    puts "%60s: %15f" % [message, times.reduce(:+)]
   end
 
 end
